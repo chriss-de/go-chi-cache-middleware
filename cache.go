@@ -26,6 +26,14 @@ type Cache struct {
 	negativeTtl time.Duration
 }
 
+func (c *Cache) Put(key string, val interface{}) error {
+	return c.c.Put(key, val, int64(c.ttl.Seconds()))
+}
+
+func (c *Cache) Get(key string) interface{} {
+	return c.c.Get(key)
+}
+
 func createCacheKey(r *http.Request) string {
 	h := sha256.New()
 	h.Write([]byte(r.URL.String()))

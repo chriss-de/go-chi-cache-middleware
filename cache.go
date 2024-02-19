@@ -70,14 +70,16 @@ func withCache(c *Cache) func(http.Handler) http.Handler {
 				ww.Header().Add(cacheStatusHeaderKey, "MISS")
 
 				defer func() {
-					cr := cachedResponse{Status: ww.Status(), Response: responseToCache, Header: ww.Header()}
-					ttl := c.ttl.Seconds()
-					if ww.Status() >= 400 {
-						ttl = c.negativeTtl.Seconds()
-					}
+					if ww.Status() >= 200 && ww.Status() < 500 {
+						cr := cachedResponse{Status: ww.Status(), Response: responseToCache, Header: ww.Header()}
+						ttl := c.ttl.Seconds()
+						if ww.Status() >= 400 {
+							ttl = c.negativeTtl.Seconds()
+						}
 
-					if err := c.c.Put(cacheKey, cr, int64(ttl)); err != nil {
-						// TODO: handle err
+						if err := c.c.Put(cacheKey, cr, int64(ttl)); err != nil {
+							// TODO: handle err
+						}
 					}
 				}()
 
